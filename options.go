@@ -62,7 +62,7 @@ var DefaultOptions PredictOptions = PredictOptions{
 	Penalty:           1.1,
 	Repeat:            64,
 	Batch:             512,
-	NKeep:             64,
+	NKeep:             0,
 	TopK:              40,
 	TopP:              0.95,
 	TailFreeSamplingZ: 1.0,

@@ -14,7 +14,7 @@ import (
 
 var (
 	threads   = 4
-	tokens    = 128
+	tokens    = 512
 	gpulayers = 0
 )
 
@@ -32,7 +32,7 @@ func main() {
 		fmt.Printf("Parsing program arguments failed: %s", err)
 		os.Exit(1)
 	}
-	l, err := llama.New(model, llama.EnableF16Memory, llama.SetContext(128),, llama.SetGPULayers(gpulayers))
+	l, err := llama.New(model, llama.SetContext(512), llama.SetGPULayers(gpulayers))
 	if err != nil {
 		fmt.Println("Loading the model failed:", err.Error())
 		os.Exit(1)
@@ -40,6 +40,12 @@ func main() {
 	fmt.Printf("Model loaded successfully.\n")
 
 	reader := bufio.NewReader(os.Stdin)
+	str, err := l.Predict(`Hello
+### Response:`, llama.Debug, llama.SetTokenCallback(func(token string) bool {
+		fmt.Print(token)
+		return true
+	}), llama.SetTokens(tokens), llama.SetTypicalP(1.0), llama.SetBatch(1), llama.SetThreads(threads), llama.SetTopK(40), llama.SetTopP(0.95), llama.SetStopWords("llama"))
+	fmt.Print("Cached:" + str)
 
 	for {
 		text := readMultiLineInput(reader)

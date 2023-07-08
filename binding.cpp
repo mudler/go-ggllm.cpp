@@ -47,12 +47,23 @@ int falcon_predict(void* params_ptr, void* state_pr, char* result, bool debug) {
     std::mt19937 rng(params.seed);
 
     std::vector<falcon_token> embd_inp; // tokenized prompt
-    std::vector<falcon_token> inp_system = {}; // system prompt
-    std::vector<falcon_token> inp_pfx = {}; // prefix to user prompt
-    std::vector<falcon_token> inp_sfx = {}; // suffix to user prompt
     std::vector<std::vector<falcon_token>> stopwords = {};
 
+    if (params.finetune_type == FINETUNE_UNSPECIFIED)
+    {
+        params.finetune_type = falcon_detect_finetune(ctx,params.model);
+    }
+     switch (params.finetune_type)
+        {
+            //FINETUNE_UNSPECIFIED, FINETUNE_NONE, FINETUNE_ALPACA, FINETUNE_OPENASSISTANT, FINETUNE_WIZARD, FINETUNE_FALCONINSTRUCT } t_finetune_type;
 
+            default:
+                if (params.stopwords.size() == 0)
+                {
+                    stopwords.push_back(::falcon_tokenize(ctx, ">>COMMENT<<", false));
+                }
+                break;
+        }
     if (params.stopwords.size())
     {
         std::string sw_token_str;
@@ -174,6 +185,42 @@ int falcon_predict(void* params_ptr, void* state_pr, char* result, bool debug) {
 
 size_t prompt_size = embd_inp.size();
 
+if (debug) {
+fprintf(stderr, "+------------+-------+-------+-------+-------+-------+-------+-------+-------+------+------+--------+---------+\n");
+fprintf(stderr, "| %10s | %5s | %4s | %4s | %4s | %4s | %4s | %4s | %4s | %4s | %4s | %4s | %4s |\n", 
+                "Sampling","rpt_n","rpt_p","prs_p","frq_p","top_k","tfs_z", "top_p", "typ_p", "temp", "miro", "mir_lr", "mir_ent");
+fprintf(stderr, "+------------+-------+-------+-------+-------+-------+-------+-------+-------+------+------+--------+---------+\n");
+fprintf(stderr, "|            | %5d | %.3f | %.3f | %.3f | %5d | %.3f | %.3f | %.3f | %.2f | %4d | %.4f | %.5f |\n", 
+                params.repeat_last_n, params.repeat_penalty, params.presence_penalty, params.frequency_penalty, params.top_k, params.tfs_z, params.top_p, params.typical_p, params.temp, params.mirostat, params.mirostat_eta, params.mirostat_tau);
+fprintf(stderr, "+============+=======+=======+=======+=======+=======+=======+-------+-------+------+------+--------+---------+\n");
+
+fprintf(stderr, "| %10s | %5s | %5s | %5s | %5s | %13s | %20s | %4s |\n", 
+                "Generation", "Ctx", "Batch", "Keep","Prom.","Seed","Finetune", "Stop");
+fprintf(stderr, "+------------+-------+-------+-------+-------+---------------+----------------------+------+\n");  
+fprintf(stderr, "|            | %5d | %5d | %5d | %5zu | %13d | %20s | #%3d |\n",
+                n_ctx, params.n_batch, params.n_keep, prompt_size,params.seed,FINETUNE_NAME[params.finetune_type], (int)(((params.logit_bias[falcon_token_eos()] == -INFINITY)?0:1)+stopwords.size()));
+fprintf(stderr, "+------------+-------+-------+-------+-------+---------------+----------------------+------+\n");  
+        fprintf(stderr, "\n");
+        fprintf(stderr, "%s: prompt: '%s'\n", __func__, params.prompt.c_str());
+        fprintf(stderr, "%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
+        for (int i = 0; i < (int) embd_inp.size(); i++) {
+            const char *c_tk = falcon_token_to_str(ctx, embd_inp[i]);
+            if (*c_tk == '\n') c_tk="\\n";
+            if (*c_tk == '\r') c_tk="\\r";
+            fprintf(stderr, "%6d -> '%s'\n", embd_inp[i], c_tk);
+        }
+        if (params.n_keep > 0) {
+        fprintf(stderr, "%s: static prompt based on n_keep: '", __func__);
+            for (int i = 0; i < params.n_keep; i++) {
+                            const char *c_tk = falcon_token_to_str(ctx, embd_inp[i]);
+            if (*c_tk == '\n') c_tk="\\n";
+            if (*c_tk == '\r') c_tk="\\r";
+                fprintf(stderr, "%s", c_tk);
+            }
+            fprintf(stderr, "'\n");
+        }
+        fprintf(stderr, "\n");
+}
     // TODO: replace with ring-buffer
     std::vector<falcon_token> last_n_tokens(n_ctx);
     std::fill(last_n_tokens.begin(), last_n_tokens.end(), 0);
@@ -459,8 +506,6 @@ size_t prompt_size = embd_inp.size();
             }
             if (stopword_fulfilled) 
             {
-                if (params.verbose_prompt) 
-                    fprintf(stderr, " [stopword]\n");
                 if (!params.interactive)
                     break;
             }
@@ -470,8 +515,6 @@ size_t prompt_size = embd_inp.size();
         if (!embd.empty() && embd.back() == falcon_token_eos() || stopword_fulfilled) 
         {
             
-                if (params.verbose_prompt)
-                    fprintf(stderr, " [end of text]\n");
                 // if we are in the prompt ingestion we will not stop
                 if (n_past > (int)embd_inp.size()) {
                     break;
@@ -574,6 +617,7 @@ void* falcon_allocate_params(const char *prompt, int seed, int threads, int toke
     params->repeat_penalty = repeat_penalty;
     params->n_batch = n_batch;
     params->n_keep = n_keep;
+    params->sys_prompt_is_raw = true;
     if (maingpu[0] != '\0') { 
         params->main_gpu = std::stoi(maingpu);
     }
