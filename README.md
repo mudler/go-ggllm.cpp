@@ -1,27 +1,27 @@
-# [![Go Reference](https://pkg.go.dev/badge/github.com/go-skynet/go-llama.cpp.svg)](https://pkg.go.dev/github.com/go-skynet/go-llama.cpp) go-llama.cpp
+# [![Go Reference](https://pkg.go.dev/badge/github.com/go-skynet/go-ggllm.cpp.svg)](https://pkg.go.dev/github.com/go-skynet/go-ggllm.cpp) go-ggllm.cpp
 
-[LLama.cpp](https://github.com/ggerganov/llama.cpp) golang bindings.
+[ggllm.cpp](https://github.com/cmp-nct/ggllm.cpp) golang bindings.
 
-The go-llama.cpp bindings are high level, as such most of the work is kept into the C/C++ code to avoid any extra computational cost, be more performant and lastly ease out maintenance, while keeping the usage as simple as possible. 
+The go-ggllm.cpp bindings are high level, as such most of the work is kept into the C/C++ code to avoid any extra computational cost, be more performant and lastly ease out maintenance, while keeping the usage as simple as possible. 
 
 Check out [this](https://about.sourcegraph.com/blog/go/gophercon-2018-adventures-in-cgo-performance) and [this](https://www.cockroachlabs.com/blog/the-cost-and-complexity-of-cgo/) write-ups which summarize the impact of a low-level interface which calls C functions from Go.
 
-If you are looking for an high-level OpenAI compatible API, check out [here](https://github.com/go-skynet/llama-cli).
+If you are looking for an high-level OpenAI compatible API, check out [here](https://github.com/go-skynet/LocalAI).
 
 ## Usage
 
-Note: This repository uses git submodules to keep track of [LLama.cpp](https://github.com/ggerganov/llama.cpp).
+Note: This repository uses git submodules to keep track of [ggllm.cpp](https://github.com/cmp-nct/ggllm.cpp).
 
 Clone the repository locally:
 
 ```bash
-git clone --recurse-submodules https://github.com/go-skynet/go-llama.cpp
+git clone --recurse-submodules https://github.com/mudler/go-ggllm.cpp
 ```
 
 To build the bindings locally, run:
 
 ```
-cd go-llama.cpp
+cd go-ggllm.cpp
 make libgglm.a
 ```
 
@@ -39,7 +39,7 @@ To build and run with OpenBLAS, for example:
 
 ```
 BUILD_TYPE=openblas make libgglm.a
-CGO_LDFLAGS="-lopenblas" LIBRARY_PATH=$PWD C_INCLUDE_PATH=$PWD go run -tags openblas ./examples -m "/model/path/here" -t 14
+CGO_LDFLAGS="-lopenblas" LIBRARY_PATH=$PWD C_INCLUDE_PATH=$PWD go run ./examples -m "/model/path/here" -t 14
 ```
 
 ### CuBLAS
@@ -80,7 +80,7 @@ cp build/bin/ggml-metal.metal .
 
 Enjoy!
 
-The documentation is available [here](https://pkg.go.dev/github.com/go-skynet/go-llama.cpp) and the full example code is [here](https://github.com/go-skynet/go-llama.cpp/blob/master/examples/main.go).
+The documentation is available [here](https://pkg.go.dev/github.com/mudler/go-ggllm.cpp) and the full example code is [here](https://github.com/mudler/go-ggllm.cpp/blob/master/examples/main.go).
 
 ## License
 
