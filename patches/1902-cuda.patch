@@ -1,0 +1,42 @@
+diff --git a/examples/falcon_common.cpp b/examples/falcon_common.cpp
+index 0c72af9..4582437 100644
+--- a/examples/falcon_common.cpp
++++ b/examples/falcon_common.cpp
+@@ -669,7 +669,7 @@ struct falcon_context * falcon_init_from_gpt_params(const gpt_params & params) {
+     lparams.logits_all   = params.perplexity;
+     lparams.embedding    = params.embedding;
+ 
+-    falcon_context * lctx = falcon_init_from_file(params.model.c_str(), lparams);
++    falcon_context * lctx = falcon_init_from_file(params.model.c_str(), &lparams);
+ 
+     if (lctx == NULL) {
+         fprintf(stderr, "%s: error: failed to load model '%s'\n", __func__, params.model.c_str());
+diff --git a/libfalcon.cpp b/libfalcon.cpp
+index af12a43..a69e8f6 100644
+--- a/libfalcon.cpp
++++ b/libfalcon.cpp
+@@ -3616,9 +3616,9 @@ static void falcon_model_quantize_internal(const std::string & fname_inp, const
+ 
+ struct falcon_context * falcon_init_from_file(
+                              const char * path_model,
+-            struct falcon_context_params   params) {
++            struct falcon_context_params  * p) {
+     ggml_time_init();
+-
++    falcon_context_params params = *p;
+     falcon_context * ctx = new falcon_context;
+     
+     if (params.seed < 0) {
+diff --git a/libfalcon.h b/libfalcon.h
+index 0a7e851..03e22c8 100644
+--- a/libfalcon.h
++++ b/libfalcon.h
+@@ -146,7 +146,7 @@ extern "C" {
+     // Return NULL on failure
+     LLAMA_API struct falcon_context * falcon_init_from_file(
+                              const char * path_model,
+-            struct falcon_context_params   params);
++            struct falcon_context_params  * params);
+     // prepare scratch and computation buffers
+     LLAMA_API void falcon_prepare_buffers(falcon_context *ctx, int n_batch, int n_ctx);
+     // Frees all allocated memory
