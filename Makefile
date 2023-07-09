@@ -204,16 +204,16 @@ ggllm.cpp/falcon_common.o:
 ggllm.cpp/cmpnct_unicode.o:
 	cd build && cp -rf CMakeFiles/cmpnct_unicode.dir/cmpnct_unicode.cpp.o ../ggllm.cpp/cmpnct_unicode.o
 
-falcon.o: prepare ggllm.cpp/ggml.o ggllm.cpp/cmpnct_unicode.o ggllm.cpp/llama.o ggllm.cpp/libfalcon.o ggllm.cpp/falcon_common.o
-	$(CXX) $(CXXFLAGS) -I./ggllm.cpp -I./ggllm.cpp/examples falcon.cpp -o falcon.o -c $(LDFLAGS)
+falcon_binding.o: prepare ggllm.cpp/ggml.o ggllm.cpp/cmpnct_unicode.o ggllm.cpp/llama.o ggllm.cpp/libfalcon.o ggllm.cpp/falcon_common.o
+	$(CXX) $(CXXFLAGS) -I./ggllm.cpp -I./ggllm.cpp/examples falcon_binding.cpp -o falcon_binding.o -c $(LDFLAGS)
 
 ## https://github.com/ggerganov/llama.cpp/pull/1902
 prepare:
 	cd ggllm.cpp && patch -p1 < ../patches/1902-cuda.patch
 	touch $@
 
-libggllm.a: prepare falcon.o ggllm.cpp/k_quants.o $(EXTRA_TARGETS)
-	ar src libggllm.a ggllm.cpp/libfalcon.o ggllm.cpp/cmpnct_unicode.o ggllm.cpp/ggml.o ggllm.cpp/k_quants.o $(EXTRA_TARGETS) ggllm.cpp/falcon_common.o falcon.o
+libggllm.a: prepare falcon_binding.o ggllm.cpp/k_quants.o $(EXTRA_TARGETS)
+	ar src libggllm.a ggllm.cpp/libfalcon.o ggllm.cpp/cmpnct_unicode.o ggllm.cpp/ggml.o ggllm.cpp/k_quants.o $(EXTRA_TARGETS) ggllm.cpp/falcon_common.o falcon_binding.o
 
 clean:
 	rm -rf *.o
