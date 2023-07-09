@@ -1,4 +1,4 @@
-#include "binding.h"
+#include "falcon.h"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -116,6 +116,8 @@ int falcon_predict(void* params_ptr, void* state_pr, char* result, bool debug) {
         // Falcon does not have a dedicated bos token (bos==eos), so don't inject it here
         // auto start = ggml_time_us();
         embd_inp = ::falcon_tokenize(ctx, params.prompt, false);
+
+fprintf(stderr, "Prompt: %s",params.prompt.c_str());
         // auto end = ggml_time_us();
         // fprintf(stderr, "%s: tokenization took %0.3f ms\n", __func__, (end - start) / 1000.0);
         // fprintf(stderr, "%s: tokens processed: %d\n", __func__, (int) embd_inp.size());
