@@ -1,7 +1,7 @@
 package ggllm
 
-// #cgo CXXFLAGS: -I./ggllm.cpp/examples -I./ggllm.cpp
-// #cgo LDFLAGS: -L./ -lggllm -lm -lstdc++
+// #cgo CXXFLAGS: -I${SRCDIR}/ggllm.cpp/examples -I${SRCDIR}/ggllm.cpp
+// #cgo LDFLAGS: -L${SRCDIR} -lggllm -lm -lstdc++
 // #cgo darwin LDFLAGS: -framework Accelerate
 // #cgo darwin CXXFLAGS: -std=c++11
 // #include "binding.h"
