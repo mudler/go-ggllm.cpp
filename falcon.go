@@ -4,7 +4,7 @@ package ggllm
 // #cgo LDFLAGS: -L${SRCDIR} -lggllm -lm -lstdc++
 // #cgo darwin LDFLAGS: -framework Accelerate
 // #cgo darwin CXXFLAGS: -std=c++11
-// #include "falcon.h"
+// #include "falcon_binding.h"
 import "C"
 import (
 	"fmt"
